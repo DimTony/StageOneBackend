@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
@@ -12,13 +13,16 @@ app.get('/api/hello', async (req, res) => {
     const ipResponse = await axios.get('https://api.ipify.org?format=json');
     const ipAddress = ipResponse.data.ip;
 
-    const geoResponse = await axios.get(`https://ipinfo.io/${ipAddress}/json`);
-    const { city } = geoResponse.data;
+    const API_KEY = process.env.API_KEY;
+
+    const weatherresponse = await axios.get(
+      `https://api.weatherapi.com/v1/current.json?q=${ipAddress}&key=${API_KEY}`
+    );
 
     res.json({
       client_ip: ipAddress,
-      location: city,
-      greeting: `Hello, ${visitorName}!, the temperature is 11 degrees Celsius in ${city}`,
+      location: weatherresponse.data.location.region,
+      greeting: `Hello, ${visitorName}!, the temperature is ${weatherresponse.data.current.temp_c} degrees Celsius in ${weatherresponse.data.location.region}`,
     });
   } catch (error) {
     console.error('Error fetching IP info:', error);
